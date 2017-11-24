@@ -26,6 +26,7 @@ public class TrafficLight {
     pins.put(Color.red, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, Color.red.name(), PinState.LOW));
     pins.put(Color.yellow, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, Color.yellow.name(), PinState.LOW));
     pins.put(Color.green, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03, Color.green.name(), PinState.LOW));
+    pins.put(Color.off, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04, Color.off.name(), PinState.LOW));
 
     for (GpioPinDigitalOutput pin : pins.values()) {
       pin.setShutdownOptions(true, PinState.LOW);
@@ -40,11 +41,9 @@ public class TrafficLight {
       pinHigh.high();
       LOGGER.info("pinHigh name:{}", pinHigh.getName());
 
-      if (this.color != Color.off) {
-        GpioPinDigitalOutput pinLow = pins.get(this.color);
-        pinLow.low();
-        LOGGER.info("pinLow name:{}", pinLow.getName());
-      }
+      GpioPinDigitalOutput pinLow = pins.get(this.color);
+      pinLow.low();
+      LOGGER.info("pinLow name:{}", pinLow.getName());
 
       this.color = color;
     }
@@ -52,5 +51,11 @@ public class TrafficLight {
 
   public Color getColor() {
     return color;
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    gpio.shutdown();
+    super.finalize();
   }
 }
