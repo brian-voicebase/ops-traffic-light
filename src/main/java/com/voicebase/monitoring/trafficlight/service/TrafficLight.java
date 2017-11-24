@@ -8,6 +8,7 @@ import com.pi4j.io.gpio.RaspiPin;
 import com.voicebase.monitoring.trafficlight.model.TrafficLightMessage.Color;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -37,20 +38,24 @@ public class TrafficLight {
     LOGGER.info("setColor:{}", color);
 
     if (this.color != color) {
-      GpioPinDigitalOutput pinHigh = pins.get(color);
-      pinHigh.low();
-      LOGGER.info("pinOn name:{}", pinHigh.getName());
-
-      GpioPinDigitalOutput pinLow = pins.get(this.color);
-      pinLow.high();
-      LOGGER.info("pinOff name:{}", pinLow.getName());
-
+      pins.get(color).low();
+      pins.get(this.color).high();
       this.color = color;
     }
   }
 
   public Color getColor() {
     return color;
+  }
+
+  @PostConstruct
+  private void test() throws InterruptedException {
+    for (int i=0;i<3;i++) {
+      for (Color color : Color.values()) {
+        setColor(color);
+        Thread.sleep(500);
+      }
+    }
   }
 
   @Override

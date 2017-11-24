@@ -13,19 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/traffic")
 public class TrafficLightController {
-  private static final Logger logger = LoggerFactory.getLogger(TrafficLightController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TrafficLightController.class);
 
   @Autowired
   private TrafficLight trafficLight;
 
   @RequestMapping(method = RequestMethod.PUT, value = "/color/{color}")
-  public void setColor(@PathVariable(name="color", required = true) String colorValue) {
+  public void setColor(@PathVariable("color") String colorValue) {
     try {
-      Color color = Color.valueOf(colorValue.toLowerCase());
-
-      trafficLight.setColor(color);
+      trafficLight.setColor(Color.valueOf(colorValue.toLowerCase()));
     } catch (IllegalArgumentException e) {
-      throw new RuntimeException("Unsupported color. Colors supported: red, yellow, green");
+      LOGGER.warn("Unsupported color:{}. Colors supported:{}.", colorValue, Color.values());
     }
   }
 
