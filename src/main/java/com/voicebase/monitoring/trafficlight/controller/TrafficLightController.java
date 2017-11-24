@@ -19,8 +19,14 @@ public class TrafficLightController {
   private TrafficLight trafficLight;
 
   @RequestMapping(method = RequestMethod.PUT, value = "/color/{color}")
-  public void setColor(@PathVariable("color") String color) {
-    trafficLight.setColor(Color.valueOf(color));
+  public void setColor(@PathVariable(name="color", required = true) String colorValue) {
+    try {
+      Color color = Color.valueOf(colorValue.toLowerCase());
+
+      trafficLight.setColor(color);
+    } catch (IllegalArgumentException e) {
+      throw new RuntimeException("Unsupported color. Colors supported: red, yellow, green");
+    }
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/color")

@@ -1,6 +1,8 @@
 package com.voicebase.monitoring.trafficlight.service;
 
 import com.voicebase.monitoring.trafficlight.model.TrafficLightMessage;
+import com.voicebase.monitoring.trafficlight.model.TrafficLightMessage.Color;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,5 +49,15 @@ public class TrafficLightScheduler {
   private void checkStatus() {
     ResponseEntity<TrafficLightMessage> responseEntity = restTemplate.exchange(url, HttpMethod.GET, getEntity(), TrafficLightMessage.class);
     trafficLight.setColor(responseEntity.getBody().getColor());
+  }
+
+  @PostConstruct
+  private void initialize() throws InterruptedException {
+    for (int i=0;i<3;i++) {
+      for (Color color : Color.values()) {
+        trafficLight.setColor(color);
+        Thread.sleep(1000);
+      }
+    }
   }
 }

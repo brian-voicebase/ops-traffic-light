@@ -29,6 +29,7 @@ public class TrafficLight {
 
     for (GpioPinDigitalOutput pin : pins.values()) {
       pin.setShutdownOptions(true, PinState.LOW);
+      pin.low();
     }
   }
 
