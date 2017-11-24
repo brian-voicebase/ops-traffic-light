@@ -20,16 +20,15 @@ public class TrafficLight {
   private static final Logger LOGGER = LoggerFactory.getLogger(TrafficLight.class);
   private final GpioController gpio = GpioFactory.getInstance();
   private Map<Color, GpioPinDigitalOutput> pins = new HashMap<Color, GpioPinDigitalOutput>();
-  private Color color;
+  private Color color = Color.off;
 
   public TrafficLight() {
-    pins.put(Color.red, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, Color.red.name(), PinState.HIGH));
-    pins.put(Color.yellow, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, Color.yellow.name(), PinState.HIGH));
-    pins.put(Color.green, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03, Color.green.name(), PinState.HIGH));
+    pins.put(Color.red, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, Color.red.name(), PinState.LOW));
+    pins.put(Color.yellow, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, Color.yellow.name(), PinState.LOW));
+    pins.put(Color.green, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03, Color.green.name(), PinState.LOW));
 
     for (GpioPinDigitalOutput pin : pins.values()) {
       pin.setShutdownOptions(true, PinState.LOW);
-      pin.low();
     }
   }
 
@@ -37,12 +36,14 @@ public class TrafficLight {
     LOGGER.info("setColor:{}", color);
 
     if (this.color != color) {
-      GpioPinDigitalOutput pin = pins.get(color);
-      pin.high();
+      GpioPinDigitalOutput pinHigh = pins.get(color);
+      pinHigh.high();
+      LOGGER.info("pinHigh name:{}", pinHigh.getName());
 
-      if (this.color != null) {
-        pin = pins.get(this.color);
-        pin.low();
+      if (this.color != Color.off) {
+        GpioPinDigitalOutput pinLow = pins.get(this.color);
+        pinLow.low();
+        LOGGER.info("pinLow name:{}", pinLow.getName());
       }
 
       this.color = color;

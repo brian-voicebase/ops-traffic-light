@@ -7,7 +7,7 @@ import lombok.Data;
  */
 @Data
 public class TrafficLightMessage {
-  public enum Color {green, yellow, red};
+  public enum Color {red, yellow, green, off};
 
   private Color color;
   private String message;
