@@ -22,12 +22,12 @@ public class TrafficLightController {
   private TrafficLight trafficLight;
 
   @RequestMapping(method = RequestMethod.PUT, value = "/color/{color}")
-  public void setColor(@PathVariable("color") String colorValue) {
+  public void setColor(@PathVariable("color") String colorValue) throws UnsupportedColorException {
     try {
       trafficLight.setColor(Color.valueOf(colorValue.toLowerCase()));
     } catch (IllegalArgumentException e) {
-      String msg = String.format("Unsupported color:{}. Colors supported:{}.", colorValue, Color.values());
-      throw new RuntimeException(msg);
+      LOGGER.warn(e.getMessage());
+      throw new UnsupportedColorException();
     }
   }
 
@@ -36,15 +36,28 @@ public class TrafficLightController {
     return trafficLight.getColor().toString();
   }
 
+  @RequestMapping(method = RequestMethod.PUT, value = "/quiet-mode/{enable}")
+  public void setQuietMode(@PathVariable("enable") boolean enable)  {
+    trafficLight.setQuietMode(enable);
+  }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/quiet-mode")
+  public Boolean getQuietMode()  {
+    return trafficLight.getQuietMode();
+  }
+
   @RequestMapping(method = RequestMethod.GET, value = "/test")
   public void test() throws InterruptedException {
     trafficLight.test();
   }
 
-  @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Unsupported Color.")
   @ExceptionHandler(Exception.class)
-  public String error(Exception e) {
-    LOGGER.warn(e.getMessage());
-    return e.getMessage();
+  public void error(Exception e) {
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Unsupported Color. Colors supported: red, yellow, green, off.")
+  public class UnsupportedColorException extends Exception {
+    public UnsupportedColorException() {
+    }
   }
 }

@@ -22,6 +22,7 @@ public class TrafficLight {
   private final GpioController gpio = GpioFactory.getInstance();
   private Map<Color, GpioPinDigitalOutput> pins = new HashMap<Color, GpioPinDigitalOutput>();
   private Color color = Color.off;
+  private boolean quietMode = false;
 
   public TrafficLight() {
     pins.put(Color.red, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, Color.red.name(), PinState.HIGH));
@@ -38,7 +39,11 @@ public class TrafficLight {
     LOGGER.info("setColor:{}", color);
 
     if (this.color != color) {
-      pins.get(color).low();
+      // Only light green, if it's enabled.
+      if (!quietMode || color!=Color.green) {
+        pins.get(color).low();
+      }
+
       pins.get(this.color).high();
       this.color = color;
     }
@@ -46,6 +51,14 @@ public class TrafficLight {
 
   public Color getColor() {
     return color;
+  }
+
+  public void setQuietMode(boolean quietMode)  {
+    this.quietMode = quietMode;
+  }
+
+  public boolean getQuietMode()  {
+    return quietMode;
   }
 
   @PostConstruct
