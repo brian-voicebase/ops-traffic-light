@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,12 +22,12 @@ public class TrafficLightController {
   private TrafficLight trafficLight;
 
   @RequestMapping(method = RequestMethod.PUT, value = "/color/{color}")
-  public void setColor(@PathVariable("color") String colorValue) throws NotFoundException{
+  public void setColor(@PathVariable("color") String colorValue) {
     try {
       trafficLight.setColor(Color.valueOf(colorValue.toLowerCase()));
     } catch (IllegalArgumentException e) {
-      LOGGER.warn("Unsupported color:{}. Colors supported:{}.", colorValue, Color.values());
-      throw new NotFoundException();
+      String msg = String.format("Unsupported color:{}. Colors supported:{}.", colorValue, Color.values());
+      throw new RuntimeException(msg);
     }
   }
 
@@ -36,13 +37,14 @@ public class TrafficLightController {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/test")
-  public void test()throws InterruptedException {
+  public void test() throws InterruptedException {
     trafficLight.test();
   }
 
-  @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Unsupported Color.")
-  public class NotFoundException extends Exception {
-    public NotFoundException() {
-    }
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Unsupported Color.")
+  @ExceptionHandler(Exception.class)
+  public String error(Exception e) {
+    LOGGER.warn(e.getMessage());
+    return e.getMessage();
   }
 }
