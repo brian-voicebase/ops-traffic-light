@@ -49,7 +49,7 @@ public class TrafficLight {
   }
 
   @PostConstruct
-  private void test() throws InterruptedException {
+  public void test() throws InterruptedException {
     for (int i=0;i<3;i++) {
       for (Color color : Color.values()) {
         setColor(color);
