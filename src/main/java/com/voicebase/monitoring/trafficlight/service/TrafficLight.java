@@ -55,6 +55,9 @@ public class TrafficLight {
 
   public void setQuietMode(boolean quietMode)  {
     this.quietMode = quietMode;
+    Color saveColor = color;
+    setColor(Color.off);
+    setColor(saveColor);
   }
 
   public boolean getQuietMode()  {

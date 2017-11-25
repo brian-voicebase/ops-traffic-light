@@ -52,10 +52,10 @@ public class TrafficLightController {
   }
 
   @ExceptionHandler(Exception.class)
-  public void error(Exception e) {
-  }
-
   @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Unsupported Color. Colors supported: red, yellow, green, off.")
+  public void error(UnsupportedColorException e) {
+  }
+  
   public class UnsupportedColorException extends Exception {
     public UnsupportedColorException() {
     }
