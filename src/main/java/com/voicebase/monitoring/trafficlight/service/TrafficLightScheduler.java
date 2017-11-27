@@ -43,7 +43,7 @@ public class TrafficLightScheduler {
     return entity;
   }
 
-  @Scheduled(fixedRate = 60000)
+  @Scheduled(fixedRate = 10000)
   private void checkStatus() {
     ResponseEntity<TrafficLightMessage> responseEntity = restTemplate.exchange(url, HttpMethod.GET, getEntity(), TrafficLightMessage.class);
     trafficLight.setColor(responseEntity.getBody().getColor());
