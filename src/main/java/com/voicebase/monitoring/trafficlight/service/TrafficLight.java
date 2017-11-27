@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,7 +23,9 @@ public class TrafficLight {
   private final GpioController gpio = GpioFactory.getInstance();
   private Map<Color, GpioPinDigitalOutput> pins = new HashMap<Color, GpioPinDigitalOutput>();
   private Color color = Color.off;
-  private boolean quietMode = false;
+
+  @Value("${monitoring.quiet-mode}")
+  private boolean quietMode;
 
   public TrafficLight() {
     pins.put(Color.red, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, Color.red.name(), PinState.HIGH));
@@ -36,7 +39,7 @@ public class TrafficLight {
   }
 
   public void setColor(Color color) {
-    LOGGER.info("setColor:{}", color);
+    LOGGER.debug("setColor:{}", color);
 
     if (this.color != color) {
       // Only light green, if it's enabled.
@@ -46,6 +49,8 @@ public class TrafficLight {
 
       pins.get(this.color).high();
       this.color = color;
+
+      LOGGER.info("Change setColor:{}", color);
     }
   }
 
