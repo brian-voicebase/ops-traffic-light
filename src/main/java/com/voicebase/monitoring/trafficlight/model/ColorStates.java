@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by brianmcglothlen on 11/22/17.
  */
 @Data
 public class ColorStates implements Comparable<ColorStates> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ColorStates.class);
   private String message;
   public enum Color {red, yellow, green};
   public enum State {on, off, flash};
@@ -30,8 +33,11 @@ public class ColorStates implements Comparable<ColorStates> {
     for (Entry<Color, State> entry : colorStatesMap.entrySet()) {
       Color color = entry.getKey();
       State state = entry.getValue();
+      State checkState = o.getColorStatesMap().get(color);
 
-      if (o.getColorStatesMap().get(color)!=state) {
+      LOGGER.info("color:{} state:{} o.color:{} checkState:{}", color, state, checkState);
+      
+      if (checkState!=state) {
         return -1;
       }
     }

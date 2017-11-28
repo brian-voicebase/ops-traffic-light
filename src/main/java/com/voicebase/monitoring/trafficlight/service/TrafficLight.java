@@ -39,7 +39,10 @@ public class TrafficLight {
   }
 
   public void setColorStates(ColorStates colorStates) {
+    LOGGER.info("this.colorstates:{}", this.colorStates);
+    LOGGER.info("colorstates:{}", colorStates);
     if (this.colorStates.compareTo(colorStates)!=0) {
+      LOGGER.info("changed");
       for (Entry<Color, State> entry : colorStates.getColorStatesMap().entrySet()) {
         Color color = entry.getKey();
         State state = entry.getValue();
