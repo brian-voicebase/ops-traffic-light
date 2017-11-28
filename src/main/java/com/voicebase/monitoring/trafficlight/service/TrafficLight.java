@@ -34,7 +34,7 @@ public class TrafficLight {
     pins.put(Color.off, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04, Color.off.name(), PinState.HIGH));
 
     for (GpioPinDigitalOutput pin : pins.values()) {
-      pin.setShutdownOptions(true, PinState.LOW);
+      pin.setShutdownOptions(true, PinState.HIGH);
     }
   }
 
