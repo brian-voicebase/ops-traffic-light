@@ -24,12 +24,13 @@ public class ColorStatus implements Comparable<ColorStatus> {
   }
 
   public ColorStatus(ColorStatus colorStatus) {
-    this.message = colorStatus.getMessage();
-    colorStates = new HashMap<Color, State>();
-
-    for (Color color : Color.values()) {
-      State state = colorStatus.colorStates.get(color);
-      colorStates.put(color, (state!=null) ? state : State.off);
+    if (colorStatus!=null) {
+      this.message = colorStatus.getMessage();
+      colorStates = new HashMap<Color, State>();
+      for (Color color : Color.values()) {
+        State state = (colorStatus.colorStates != null) ? colorStatus.colorStates.get(color) : null;
+        colorStates.put(color, (state != null) ? state : State.off);
+      }
     }
   }
 
