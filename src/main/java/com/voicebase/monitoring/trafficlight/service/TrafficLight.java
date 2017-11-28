@@ -5,13 +5,15 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
-import com.voicebase.monitoring.trafficlight.model.TrafficLightMessage.Color;
+import com.voicebase.monitoring.trafficlight.model.ColorStates;
+import com.voicebase.monitoring.trafficlight.model.ColorStates.Color;
+import com.voicebase.monitoring.trafficlight.model.ColorStates.State;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,58 +24,52 @@ public class TrafficLight {
   private static final Logger LOGGER = LoggerFactory.getLogger(TrafficLight.class);
   private final GpioController gpio = GpioFactory.getInstance();
   private Map<Color, GpioPinDigitalOutput> pins = new HashMap<Color, GpioPinDigitalOutput>();
-  private Color color = Color.off;
-
-  @Value("${monitoring.quiet-mode}")
-  private boolean quietMode;
+  private ColorStates colorStates = ColorStates.off();
 
   public TrafficLight() {
     pins.put(Color.red, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, Color.red.name(), PinState.HIGH));
     pins.put(Color.yellow, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, Color.yellow.name(), PinState.HIGH));
     pins.put(Color.green, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03, Color.green.name(), PinState.HIGH));
-    pins.put(Color.off, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04, Color.off.name(), PinState.HIGH));
 
     for (GpioPinDigitalOutput pin : pins.values()) {
       pin.setShutdownOptions(true, PinState.HIGH);
     }
   }
 
-  public void setColor(Color color) {
-    LOGGER.debug("setColor:{}", color);
+  public void setColorStates(ColorStates colorStates) {
+    if (this.colorStates.compareTo(colorStates)!=0) {
+      for (Entry<Color, State> entry : colorStates.getColorStatesMap().entrySet()) {
+        Color color = entry.getKey();
+        State state = entry.getValue();
+        GpioPinDigitalOutput pin = pins.get(color);
 
-    if (this.color != color) {
-      // Only light green, if it's enabled.
-      if (!quietMode || color!=Color.green) {
-        pins.get(color).low();
+        switch (state) {
+          case on:
+            pin.low();
+          case flash:
+            pin.blink(500);
+          default:
+            pin.high();
+        }
       }
 
-      pins.get(this.color).high();
-      this.color = color;
+      this.colorStates = colorStates;
 
-      LOGGER.info("Change setColor:{}", color);
+      LOGGER.info("Change setColorStates:{}", colorStates);
     }
   }
 
-  public Color getColor() {
-    return color;
-  }
-
-  public void setQuietMode(boolean quietMode)  {
-    this.quietMode = quietMode;
-    Color saveColor = color;
-    setColor(Color.off);
-    setColor(saveColor);
-  }
-
-  public boolean getQuietMode()  {
-    return quietMode;
+  public ColorStates getColorStates() {
+    return colorStates;
   }
 
   @PostConstruct
   public void test() throws InterruptedException {
-    for (int i=0;i<3;i++) {
+    ColorStates colorStates = ColorStates.off();
+    for (int i=0; i<3; i++) {
       for (Color color : Color.values()) {
-        setColor(color);
+        colorStates.getColorStatesMap().put(color, State.on);
+        setColorStates(colorStates);
         Thread.sleep(500);
       }
     }
