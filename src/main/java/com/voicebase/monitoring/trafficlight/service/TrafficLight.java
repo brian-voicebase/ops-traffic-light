@@ -76,10 +76,9 @@ public class TrafficLight {
 
   @PostConstruct
   public void test() throws InterruptedException {
-    ColorStates testColorStates = ColorStates.off();
-    LOGGER.info("Test initial color states:{}", testColorStates);
     for (int i=0; i<3; i++) {
       for (Color color : Color.values()) {
+        ColorStates testColorStates = ColorStates.off();
         LOGGER.info("Test color:{}", color);
         testColorStates.getColorStatesMap().put(color, State.on);
         LOGGER.info("Color States:{}", testColorStates);
