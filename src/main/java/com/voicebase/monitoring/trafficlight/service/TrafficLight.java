@@ -5,9 +5,9 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
-import com.voicebase.monitoring.trafficlight.model.ColorStates;
-import com.voicebase.monitoring.trafficlight.model.ColorStates.Color;
-import com.voicebase.monitoring.trafficlight.model.ColorStates.State;
+import com.voicebase.monitoring.trafficlight.model.ColorStatus;
+import com.voicebase.monitoring.trafficlight.model.ColorStatus.Color;
+import com.voicebase.monitoring.trafficlight.model.ColorStatus.State;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,9 +22,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class TrafficLight {
   private static final Logger LOGGER = LoggerFactory.getLogger(TrafficLight.class);
+  private static final int FLASHRATE = 500;
   private final GpioController gpio = GpioFactory.getInstance();
-  private Map<Color, GpioPinDigitalOutput> pins = new HashMap<Color, GpioPinDigitalOutput>();
-  private ColorStates colorStates = ColorStates.off();
+  private final Map<Color, GpioPinDigitalOutput> pins = new HashMap<Color, GpioPinDigitalOutput>();
+  private ColorStatus colorStatus = ColorStatus.reset();
 
   public TrafficLight() {
     pins.put(Color.red, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, Color.red.name(), PinState.HIGH));
@@ -34,24 +35,22 @@ public class TrafficLight {
     for (GpioPinDigitalOutput pin : pins.values()) {
       pin.setShutdownOptions(true, PinState.HIGH);
     }
-
-    LOGGER.info("Initial color states:{}", colorStates);
   }
 
-  public void setColorStates(ColorStates colorStates) {
-    if (this.colorStates.compareTo(colorStates)!=0) {
-      for (Entry<Color, State> entry : colorStates.getColorStatesMap().entrySet()) {
-        Color color = entry.getKey();
-        State state = entry.getValue();
+  public void setColorStatus(ColorStatus colorStatus) {
+    // Use copy constructor so we save our own version of colorStatus and not a pointer to it.
+    // (so it can't be changed without calling this API).
+    ColorStatus copiedColorStatus = new ColorStatus(colorStatus);
 
-        // Clear all pins
-        GpioPinDigitalOutput pin = pins.get(color);
-        switch (state) {
+    if (this.colorStatus.compareTo(copiedColorStatus)!=0) {
+      for (Entry<Color, State> entry : copiedColorStatus.getColorStates().entrySet()) {
+        GpioPinDigitalOutput pin = pins.get(entry.getKey());
+        switch (entry.getValue()) {
           case on:
             pin.low();
             break;
           case flash:
-            pin.blink(500);
+            pin.blink(FLASHRATE);
             break;
           case off:
           default:
@@ -61,28 +60,34 @@ public class TrafficLight {
         }
       }
 
-      this.colorStates = colorStates;
-      LOGGER.info("Change setColorStates:{}", colorStates);
+      this.colorStatus = copiedColorStatus;
+      LOGGER.info("Change setColorStates:{}", colorStatus);
     }
   }
 
-  public ColorStates getColorStates() {
-    return colorStates;
+  public ColorStatus getColorStatus() {
+    return colorStatus;
   }
 
   @PostConstruct
   public void test() throws InterruptedException {
-    for (int i=0; i<3; i++) {
+    for (State state : State.values()) {
       for (Color color : Color.values()) {
-        ColorStates testColorStates = ColorStates.off();
-        testColorStates.getColorStatesMap().put(color, State.on);
-        setColorStates(testColorStates);
-        Thread.sleep(500);
+        ColorStatus colorStatus = ColorStatus.reset();
+        colorStatus.getColorStates().put(color, state);
+        setColorStatus(colorStatus);
+        Thread.sleep(1500);
       }
     }
 
-    ColorStates testColorStates = ColorStates.off();
-    setColorStates(testColorStates);
+    for (State state : State.values()) {
+      ColorStatus colorStatus = ColorStatus.reset();
+      colorStatus.getColorStates().put(Color.red, state);
+      colorStatus.getColorStates().put(Color.yellow, state);
+      colorStatus.getColorStates().put(Color.green, state);
+      setColorStatus(colorStatus);
+      Thread.sleep(1500);
+    }
   }
 
   @Override

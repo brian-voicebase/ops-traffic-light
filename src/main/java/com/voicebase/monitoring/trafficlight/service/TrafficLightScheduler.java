@@ -1,6 +1,6 @@
 package com.voicebase.monitoring.trafficlight.service;
 
-import com.voicebase.monitoring.trafficlight.model.ColorStates;
+import com.voicebase.monitoring.trafficlight.model.ColorStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +46,13 @@ public class TrafficLightScheduler {
   @Scheduled(fixedRate = 10000)
   private void checkStatus() throws Exception {
     try {
-      ResponseEntity<ColorStates> responseEntity = restTemplate
+      ResponseEntity<ColorStatus> responseEntity = restTemplate
           .exchange(url, HttpMethod.GET,
-              getEntity(), ColorStates.class);
-      trafficLight.setColorStates(responseEntity.getBody());
+              getEntity(), ColorStatus.class);
+      trafficLight.setColorStatus(responseEntity.getBody());
     } catch (Exception e) {
-      trafficLight.setColorStates(ColorStates.off());
       LOGGER.error("Failed calling external website.");
+      trafficLight.setColorStatus(ColorStatus.reset());
       throw e;
     }
   }
