@@ -46,10 +46,13 @@ public class TrafficLight {
         switch (state) {
           case on:
             pin.low();
+            break;
           case flash:
             pin.blink(500);
+            break;
           default:
             pin.high();
+            break;
         }
       }
 
