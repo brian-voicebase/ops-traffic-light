@@ -76,7 +76,7 @@ public class TrafficLight {
         ColorStatus colorStatus = ColorStatus.reset();
         colorStatus.getColorStates().put(color, state);
         setColorStatus(colorStatus);
-        Thread.sleep(1500);
+        Thread.sleep(2000);
       }
     }
 
@@ -86,7 +86,7 @@ public class TrafficLight {
       colorStatus.getColorStates().put(Color.yellow, state);
       colorStatus.getColorStates().put(Color.green, state);
       setColorStatus(colorStatus);
-      Thread.sleep(1500);
+      Thread.sleep(2000);
     }
   }
 
