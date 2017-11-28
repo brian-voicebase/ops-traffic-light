@@ -57,7 +57,8 @@ public class TrafficLight {
             break;
           case off:
           default:
-            LOGGER.info("Turn it off"+color);
+            LOGGER.info("Turn it off:"+color);
+            pin.blink(0);
             pin.high();
             break;
         }
@@ -81,6 +82,8 @@ public class TrafficLight {
         colorStates.getColorStatesMap().put(color, State.on);
         setColorStates(colorStates);
         Thread.sleep(500);
+        colorStates.getColorStatesMap().put(color, State.off);
+        setColorStates(colorStates);
       }
     }
   }
