@@ -34,25 +34,28 @@ public class TrafficLight {
     for (GpioPinDigitalOutput pin : pins.values()) {
       pin.setShutdownOptions(true, PinState.HIGH);
     }
+
+    LOGGER.info("Initial color states:{}", colorStates);
   }
 
   public void setColorStates(ColorStates colorStates) {
     if (this.colorStates.compareTo(colorStates)!=0) {
+      LOGGER.info("Changed");
       for (Entry<Color, State> entry : colorStates.getColorStatesMap().entrySet()) {
         Color color = entry.getKey();
         State state = entry.getValue();
 
-        // Clear all pins
-        for (GpioPinDigitalOutput pin : pins.values()) {
-          pin.high();
-        }
+        LOGGER.info("Color:{} state:{}", color, state);
 
+        // Clear all pins
         GpioPinDigitalOutput pin = pins.get(color);
         switch (state) {
           case on:
+            LOGGER.info("Turn it on:"+color);
             pin.low();
             break;
           case flash:
+            LOGGER.info("Turn it flash:"+color);
             pin.blink(500);
             break;
           case off:
@@ -77,8 +80,10 @@ public class TrafficLight {
   @PostConstruct
   public void test() throws InterruptedException {
     ColorStates colorStates = ColorStates.off();
+    LOGGER.info("Test initial color states:{}", colorStates);
     for (int i=0; i<3; i++) {
       for (Color color : Color.values()) {
+        LOGGER.info("Test color:{}", color);
         colorStates.getColorStatesMap().put(color, State.on);
         setColorStates(colorStates);
         Thread.sleep(500);
