@@ -41,8 +41,13 @@ public class TrafficLight {
       for (Entry<Color, State> entry : colorStates.getColorStatesMap().entrySet()) {
         Color color = entry.getKey();
         State state = entry.getValue();
-        GpioPinDigitalOutput pin = pins.get(color);
 
+        // Clear all pins
+        for (GpioPinDigitalOutput pin : pins.values()) {
+          pin.high();
+        }
+
+        GpioPinDigitalOutput pin = pins.get(color);
         switch (state) {
           case on:
             pin.low();
@@ -50,7 +55,9 @@ public class TrafficLight {
           case flash:
             pin.blink(500);
             break;
+          case off:
           default:
+            LOGGER.info("Turn it off"+color);
             pin.high();
             break;
         }
