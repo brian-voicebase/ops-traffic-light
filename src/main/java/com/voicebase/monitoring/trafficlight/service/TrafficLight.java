@@ -39,10 +39,7 @@ public class TrafficLight {
   }
 
   public void setColorStates(ColorStates colorStates) {
-    LOGGER.info("this.colorstates:{}", this.colorStates);
-    LOGGER.info("colorstates:{}", colorStates);
     if (this.colorStates.compareTo(colorStates)!=0) {
-      LOGGER.info("changed");
       for (Entry<Color, State> entry : colorStates.getColorStatesMap().entrySet()) {
         Color color = entry.getKey();
         State state = entry.getValue();
@@ -65,7 +62,6 @@ public class TrafficLight {
       }
 
       this.colorStates = colorStates;
-
       LOGGER.info("Change setColorStates:{}", colorStates);
     }
   }
@@ -79,16 +75,14 @@ public class TrafficLight {
     for (int i=0; i<3; i++) {
       for (Color color : Color.values()) {
         ColorStates testColorStates = ColorStates.off();
-        LOGGER.info("Test color:{}", color);
         testColorStates.getColorStatesMap().put(color, State.on);
-        LOGGER.info("Color States:{}", testColorStates);
         setColorStates(testColorStates);
         Thread.sleep(500);
-        testColorStates.getColorStatesMap().put(color, State.off);
-        LOGGER.info("Color States:{}", testColorStates);
-        setColorStates(testColorStates);
       }
     }
+
+    ColorStates testColorStates = ColorStates.off();
+    setColorStates(testColorStates);
   }
 
   @Override

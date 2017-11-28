@@ -34,9 +34,6 @@ public class ColorStates implements Comparable<ColorStates> {
       Color color = entry.getKey();
       State state = entry.getValue();
       State checkState = o.getColorStatesMap().get(color);
-
-      LOGGER.info("color:{} state:{} o.color:{} checkState:{}", color, state, checkState);
-
       if (checkState!=state) {
         return -1;
       }
